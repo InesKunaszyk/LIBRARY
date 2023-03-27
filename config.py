@@ -10,9 +10,6 @@ load_dotenv(env_file)
 
 
 class Config:
-    DEBUG = True
-#     zapewnia autorestartowanie serwera w przypadku zmiany kodu
-    SERET_KEY = os.environ.get('SECRET_KEY')
-#     zapewnia bezpieczeństwo danych; niegdy w kodzie; nie udostepniamy publicznie;
-
-# print(Config.SERET_KEY)
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
