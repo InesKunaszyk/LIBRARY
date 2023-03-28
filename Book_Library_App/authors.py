@@ -1,32 +1,62 @@
-from Book_Library_App import app
-from flask import jsonify
+from Book_Library_App import app, db
+from flask import jsonify, request
+from Book_Library_App.models import Author, AuthorSchema, author_schema
 
+from webargs.flaskparser import use_args
 
 @app.route('/api/i/authors', methods=['GET'])
 def get_authors():
     """"Return all authors"""
+    authors = Author.query.all()
+    author_schema = AuthorSchema(many=True)
+
     return jsonify({
         'success': True,
-        'data': 'Get all authors'
+        'data': author_schema.dump(authors),
+        'number_of_records': len(authors),
     })
 
 
 @app.route('/api/i/authors/<int:author_id>', methods=['GET'])
 def get_author(author_id: int):
     """Returns a single author with ID"""
+    author = Author.query.get_or_404(author_id, description=f"Author with id: {author_id} not found")
     return jsonify({
         'success': True,
-        'data': f'Get author with id: {author_id}'
-    })
+        'data': author_schema.dump(author),
+    }), 201
 
 
 @app.route('/api/i/authors', methods=['POST'])
-def create_author():
+# CODE USE WITH MARSMALLOW & WEBARGS
+@use_args(author_schema)
+def create_author(args: dict):
     """Create a new author"""
+    author = Author(**args)
+
+    db.session.add(author)
+    db.session.commit()
+
     return jsonify({
         'success': True,
-        'data': 'New author has been Created'
+        'data': author_schema.dump(author)
     }), 201
+
+    # CODE WITHOUT USE MARSHMALLOW 'VALIDATE & VALIDATIONERROR" -> LOOAK AT DATA VALIDATION
+
+    # data = request.get_json()
+    # first_name = data.get('first_name')
+    # last_name = data.get('last_name')
+    # birth_date = data.get('birth_date')
+
+    # author = Author(first_name=first_name, last_name=last_name, birth_date=birth_date)
+    # db.session.add(author)
+    # db.session.commit()
+
+    # return jsonify({
+    #     'success': True,
+    #     'data': 'New author has been Created'
+    # }), 201
 
 
 @app.route('/api/i/authors/<int:author_id>', methods=['PUT'])
