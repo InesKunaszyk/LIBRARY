@@ -26,7 +26,7 @@ class AuthorSchema(Schema):
     @validates('birth_date')
     def validate_birth_date(self, value):
         if value > datetime.now().date():
-            raise ValidationError(f"Birth Date must be lower than {datetime.now().date()} " )
+            raise ValidationError(f"Birth Date must be lower than {datetime.now().date()} ")
 
 
 author_schema = AuthorSchema()

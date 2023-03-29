@@ -1,6 +1,8 @@
-from Book_Library_App import app, db
 from flask import jsonify, request
+
+from Book_Library_App import app, db
 from Book_Library_App.models import Author, AuthorSchema, author_schema
+from Book_Library_App.utils import validate_json_content_type
 
 from webargs.flaskparser import use_args
 
@@ -29,7 +31,8 @@ def get_author(author_id: int):
 
 @app.route('/api/i/authors', methods=['POST'])
 # CODE USE WITH MARSMALLOW & WEBARGS
-@use_args(author_schema)
+@validate_json_content_type
+@use_args(author_schema, error_status_code=400)
 def create_author(args: dict):
     """Create a new author"""
     author = Author(**args)
