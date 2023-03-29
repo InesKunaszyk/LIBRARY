@@ -1,3 +1,5 @@
+from flask import jsonify, session
+
 from Book_Library_App import db
 
 from marshmallow import Schema, fields, validates, ValidationError
@@ -15,6 +17,23 @@ class Author(db.Model):
 
     def __str__(self):
         return f'<{self.__class__.__name__}>: {self.first_name}  {self.last_name}'
+
+    @staticmethod
+    def get_schema_args(fields: str):
+        schema_args = {'many': True}
+        print(fields)
+        author = session.query(Author).all()
+        a = Author.__table__.columns
+        print(author)
+        print(a)
+
+        # for a in author:
+        #     return print(a)
+
+        if fields:
+            schema_args['only'] = [field for field in fields.split(',') if fields in Author.__table__.columns]
+        return schema_args
+
 
 
 class AuthorSchema(Schema):

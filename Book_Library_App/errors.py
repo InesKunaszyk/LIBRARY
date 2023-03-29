@@ -3,6 +3,7 @@ from Book_Library_App import app, db
 
 
 class ErrorResponse:
+    """"Class to errors handling"""
     def __init__(self, message: str, http_status: int):
         self.payload = {
             'success': False,
@@ -19,7 +20,6 @@ class ErrorResponse:
 
 @app.errorhandler(404)
 def not_found_error(err):
-    """Using """
     return ErrorResponse(err.description, 404).to_response()
 
 

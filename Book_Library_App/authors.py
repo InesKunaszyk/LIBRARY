@@ -6,11 +6,14 @@ from Book_Library_App.utils import validate_json_content_type
 
 from webargs.flaskparser import use_args
 
+
 @app.route('/api/i/authors', methods=['GET'])
 def get_authors():
     """"Return all authors"""
     authors = Author.query.all()
-    author_schema = AuthorSchema(many=True)
+    schema_args = Author.get_schema_args(request.args.get('fields'))
+    author_schema = AuthorSchema(**schema_args)
+    print(schema_args)
 
     return jsonify({
         'success': True,
@@ -92,4 +95,3 @@ def delete_author(author_id: int):
         'success': True,
         'data': f'Author with id: {author_id} has been deleted'
     })
-GIT
