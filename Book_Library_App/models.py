@@ -8,6 +8,8 @@ from marshmallow.validate import Length
 
 from datetime import datetime
 
+from werkzeug.datastructures import ImmutableDict
+
 
 class Author(db.Model):
     __tablename__ = 'author'
@@ -39,6 +41,21 @@ class Author(db.Model):
                 if column_attr is not None:
                     query = query.order_by(column_attr.desc()) if desc else query.order_by(column_attr)
         return query
+
+    @staticmethod
+    def apply_filter(query: BaseQuery, params: ImmutableDict) -> BaseQuery:
+        for param, value in params.items():
+            if param not in {'fields', 'sort'}:
+                column_attr = getattr(Author, param, None)
+                if column_attr is not None:
+                    if param == 'birth_date':
+                        try:
+                            value = datetime.strptime(value, '%d-%m-%Y').date()
+                        except ValueError:
+                            continue
+                    query = query.filter(column_attr == value)
+        return query
+
 
 
 class AuthorSchema(Schema):
