@@ -1,4 +1,5 @@
 from flask import jsonify, session
+from flask_sqlalchemy import BaseQuery
 
 from Book_Library_App import db
 
@@ -9,7 +10,7 @@ from datetime import datetime
 
 
 class Author(db.Model):
-    # __tablename__ = 'authors'
+    __tablename__ = 'author'
     id = db.Column(db.Integer(), primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
@@ -19,21 +20,25 @@ class Author(db.Model):
         return f'<{self.__class__.__name__}>: {self.first_name}  {self.last_name}'
 
     @staticmethod
-    def get_schema_args(fields: str):
+    def get_schema_args(fields: str) -> dict:
         schema_args = {'many': True}
-        print(fields)
-        author = session.query(Author).all()
-        a = Author.__table__.columns
-        print(author)
-        print(a)
-
-        # for a in author:
-        #     return print(a)
 
         if fields:
             schema_args['only'] = [field for field in fields.split(',') if fields in Author.__table__.columns]
         return schema_args
 
+    @staticmethod
+    def apply_order(query: BaseQuery, sort_keys: str) -> BaseQuery:
+        if sort_keys:
+            for key in sort_keys.split(','):
+                desc = False
+                if key.startswith('-'):
+                    key = key[1:]
+                    desc = True
+                column_attr = getattr(Author, key, None)
+                if column_attr is not None:
+                    query = query.order_by(column_attr.desc()) if desc else query.order_by(column_attr)
+        return query
 
 
 class AuthorSchema(Schema):

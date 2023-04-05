@@ -10,10 +10,12 @@ from webargs.flaskparser import use_args
 @app.route('/api/i/authors', methods=['GET'])
 def get_authors():
     """"Return all authors"""
-    authors = Author.query.all()
+    query = Author.query
     schema_args = Author.get_schema_args(request.args.get('fields'))
+    query = Author.apply_order(query, request.args.get('sort'))
+    authors = query.all()
     author_schema = AuthorSchema(**schema_args)
-    print(schema_args)
+    print(author_schema)
 
     return jsonify({
         'success': True,
