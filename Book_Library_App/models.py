@@ -12,7 +12,6 @@ from marshmallow.validate import Length
 from datetime import datetime
 from typing import Tuple
 
-from werkzeug.datastructures import ImmutableDict
 
 from Book_Library_App import Config
 
@@ -63,8 +62,8 @@ class Author(db.Model):
         return operator_mapping[operator]
 
     @staticmethod
-    def apply_filter(query: BaseQuery, params: ImmutableDict) -> BaseQuery:
-        for param, value in params.args.items():
+    def apply_filter(query: BaseQuery) -> BaseQuery:
+        for param, value in request.args.items():
             if param not in {'fields', 'sort', 'page', 'limit'}:
                 operator = '=='
                 match = COMPARISION_OPERATORS_RE.match(param)
@@ -84,26 +83,26 @@ class Author(db.Model):
         return query
 
     @staticmethod
-    def pagination(query: BaseQuery) -> Tuple[list, dict]:
+    def get_pagination(query: BaseQuery):
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', Config.PER_PAGE, type=int)
 
-        params = {key: values for key, value in request.args.items() if key != 'page'}
+        params = {key: value for key, value in request.args.items() if key != 'page'}
 
-        paginate = query.paginate(page, limit, False)
+        paginate_obj = query.paginate(page, limit, False)
         pagination = {
-            'total_pages': paginate.pages,
-            'total_records': paginate.total,
+            'total_pages': paginate_obj.pages,
+            'total_records': paginate_obj.total,
             'current_page': url_for('get_authors', page=page, **params)
         }
 
-        if paginate.has_next:
+        if paginate_obj.has_next:
             pagination['next_page'] = url_for('get_authors', page=page+1, **params)
 
-        if paginate.has_prev:
+        if paginate_obj.has_prev:
             pagination['previous_page'] = url_for('get_authors', page=page-1, **params)
 
-        return paginate.items, pagination
+        return paginate_obj.items, pagination
 
 
 class AuthorSchema(Schema):

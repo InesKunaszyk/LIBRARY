@@ -13,9 +13,9 @@ def get_authors():
     query = Author.query
     schema_args = Author.get_schema_args(request.args.get('fields'))
     query = Author.apply_order(query, request.args.get('sort'))
-    query = Author.apply_filter(query, request.args)
+    query = Author.apply_filter(query)
     authors = query.all()
-    itmes, pagination = Author.pagination(query)
+    items, pagination = Author.get_pagination(query)
 
     author_schema = AuthorSchema(**schema_args).dump(items)
 
