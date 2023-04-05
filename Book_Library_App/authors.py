@@ -15,13 +15,15 @@ def get_authors():
     query = Author.apply_order(query, request.args.get('sort'))
     query = Author.apply_filter(query, request.args)
     authors = query.all()
-    author_schema = AuthorSchema(**schema_args)
-    print(author_schema)
+    itmes, pagination = Author.pagination(query)
+
+    author_schema = AuthorSchema(**schema_args).dump(items)
 
     return jsonify({
         'success': True,
         'data': author_schema.dump(authors),
         'number_of_records': len(authors),
+        'pagination': pagination
     })
 
 
